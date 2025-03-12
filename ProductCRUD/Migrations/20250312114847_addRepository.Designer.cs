@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ProductCRUD.Data;
 
@@ -10,9 +11,11 @@ using ProductCRUD.Data;
 namespace ProductCRUD.Migrations
 {
     [DbContext(typeof(ApplicatonDbContext))]
-    partial class ApplicatonDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250312114847_addRepository")]
+    partial class addRepository
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

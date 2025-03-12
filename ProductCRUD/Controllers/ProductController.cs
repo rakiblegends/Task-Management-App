@@ -2,22 +2,25 @@
 using Microsoft.EntityFrameworkCore;
 using ProductCRUD.Data;
 using ProductCRUD.Models;
+using ProductCRUD.Repository;
 using System;
 
 namespace ProductCRUD.Controllers
 {
     public class ProductController : Controller
     {
-        private readonly ApplicatonDbContext _context;
+        private readonly IRepository<Product> _productRepository;
+        //private readonly ApplicatonDbContext _context;
 
-        public ProductController(ApplicatonDbContext context)
+        public ProductController(IRepository<Product> productRepository)
         {
-            _context = context;
+            _productRepository = productRepository;
         }
 
+        //GET Products
         public async Task<IActionResult> Index()
         {
-            var products = await _context.Products.ToListAsync(); // Fetch all products
+            var products = await _productRepository.GetAllAsync(); // Fetch all products
             return View(products);
         }
 
@@ -26,7 +29,11 @@ namespace ProductCRUD.Controllers
             return View();
         }
 
+
+
+        // Create new product
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Product product)
         {
             
@@ -45,21 +52,22 @@ namespace ProductCRUD.Controllers
             }
             if (ModelState.IsValid)
             {
-                await _context.Products.AddAsync(product);
-                await _context.SaveChangesAsync();
+                await _productRepository.AddAsync(product);
                 TempData["success"] ="The product added successfully";
                 return RedirectToAction("Index", "Product");
             }
             else
             {
-                return View();
+                return View(product);
             }
             
         }
 
+
+        //GET: Product/Edit/5
         public async Task<IActionResult> Edit(int id)
         {
-            var product = await _context.Products.FirstOrDefaultAsync(p => p.Id == id);
+            var product = await _productRepository.GetByIdAsync(id);
 
             if (product == null)
             {
@@ -70,26 +78,32 @@ namespace ProductCRUD.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Edit(Product product)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, Product product)
         {
-            _context.Update(product);
-            await _context.SaveChangesAsync();
+            if(id!= product.Id)
+            {
+                return BadRequest("Product Mismatch");
+            }
+            if(!ModelState.IsValid)
+            {
+                return View(product);
+            }
+            _productRepository.UpdateAsync(product);
             TempData["success"] ="The product Edited successfully";
             return RedirectToAction("Index");
         }
 
         public async Task<IActionResult> Delete(int id)
         {
-            var product = await _context.Products.FirstOrDefaultAsync(x => x.Id == id);
+            var product = await _productRepository.GetByIdAsync(id);
 
             if (product == null)
             {
                 return NotFound(id);
             }
 
-            _context.Products.Remove(product);
-
-            await _context.SaveChangesAsync();
+            _productRepository.DeleteAsync(product);
             TempData["success"] ="The product deleted successfully";
             return RedirectToAction("Index");
         }

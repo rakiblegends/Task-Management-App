@@ -1,10 +1,14 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using ProductCRUD.Data;
+using ProductCRUD.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+//Register repository services
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+
+// Add services to the container.(for database connection)
 builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<ApplicatonDbContext> (options=> 
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnections")));
